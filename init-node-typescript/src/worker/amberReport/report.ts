@@ -41,11 +41,6 @@ export default class ReportWorker {
       const { _id, ...rest } = item;
       return { date: _id, ...rest };
     });
-    // const createData = await AmberReport.insertMany(dataRes);
-    // const getData = await AmberReport.find({});
-    // const deleteData = await AmberReport.deleteMany({
-    //   count: 1,
-    // });
 
     // create and update data
     getData.forEach(async (item) => {
@@ -56,32 +51,6 @@ export default class ReportWorker {
         await dataFind.updateOne(item);
       }
     });
-
-    // find One
-    // await AmberReport.findOne({ count: 1 }).select('date count totalView').exec(
-    //   (err, result) => {
-    //     console.log(`@: ${result}`);
-    //     req.response = {
-    //       learn: result,
-    //     }
-    //   }
-    // );
-
-    // find All
-    await AmberReport.find({})
-      .select('date count totalView').limit(50)
-      .sort({ totalView: -1 })
-      .exec((err, result) => {
-        req.response = {
-          data: result,
-          total: result.length,
-        };
-      });
-
-    // req.response = {
-    //   data: response,
-    //   total: response.length,
-    // };
 
     next();
   }
