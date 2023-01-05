@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-import { resInteractions, resPost } from '../../controller/controller';
 import AmberReport from '../../model/amberReport/Report';
+import QueryData from '../../common/queryDB';
 
 export default class ReportWorker {
   static async getReport(req, res, next) {
@@ -8,13 +8,16 @@ export default class ReportWorker {
       from, to,
     } = req.query;
 
-    const groupDataPost = await resPost(from, to);
+    const post = new QueryData(from, to);
+    const groupDataPost = await post.getResPost();
+
+    const interaction = new QueryData(from, to);
     const {
       groupDataView,
       groupDataLove,
       groupDataBookmark,
       groupDataRating,
-    } = await resInteractions(from, to);
+    } = await interaction.getInteractions();
 
     const data = [
       ...groupDataPost,
@@ -46,21 +49,39 @@ export default class ReportWorker {
 
     // create and update data
     getData.forEach(async (item) => {
-      const dataFind = await AmberReport.findOne({ date: item.date });
+      const dataFind = await AmberReport.findOne({ date: item.date }, '_id');
       if (dataFind === null) {
         await AmberReport.create(item);
       } else {
-        await AmberReport.updateOne({ date: item.date }, item);
+        await dataFind.updateOne(item);
       }
     });
 
-    // get all data
-    const response = await AmberReport.find({});
+    // find One
+    // await AmberReport.findOne({ count: 1 }).select('date count totalView').exec(
+    //   (err, result) => {
+    //     console.log(`@: ${result}`);
+    //     req.response = {
+    //       learn: result,
+    //     }
+    //   }
+    // );
 
-    req.response = {
-      data: response,
-      total: response.length,
-    };
+    // find All
+    await AmberReport.find({})
+      .select('date count totalView').limit(50)
+      .sort({ totalView: -1 })
+      .exec((err, result) => {
+        req.response = {
+          data: result,
+          total: result.length,
+        };
+      });
+
+    // req.response = {
+    //   data: response,
+    //   total: response.length,
+    // };
 
     next();
   }

@@ -93,4 +93,4 @@ class QueryData {
     }
 }
 exports.default = QueryData;
-//# sourceMappingURL=controller.js.map
+//# sourceMappingURL=queryDB.js.map

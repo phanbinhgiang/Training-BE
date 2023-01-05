@@ -1,5 +1,5 @@
 import Post from '../../model/system/Post';
-import { resPost } from '../../controller/controller';
+import QueryData from '../../common/queryDB';
 
 export default class PostWorker {
   static async getPostCount(req, res, next) {
@@ -17,7 +17,9 @@ export default class PostWorker {
       },
     });
 
-    const groupData = await resPost(from, to);
+    // const groupData = await resPost(from, to);
+    const post = new QueryData(from, to);
+    const groupData = await post.getResPost();
 
     next();
     req.response = {

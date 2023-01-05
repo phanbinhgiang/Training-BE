@@ -24,14 +24,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-underscore-dangle */
-const controller_1 = require("../../controller/controller");
 const Report_1 = __importDefault(require("../../model/amberReport/Report"));
+const queryDB_1 = __importDefault(require("../../common/queryDB"));
 class ReportWorker {
     static getReport(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             const { from, to, } = req.query;
-            const groupDataPost = yield (0, controller_1.resPost)(from, to);
-            const { groupDataView, groupDataLove, groupDataBookmark, groupDataRating, } = yield (0, controller_1.resInteractions)(from, to);
+            const post = new queryDB_1.default(from, to);
+            const groupDataPost = yield post.getResPost();
+            const interaction = new queryDB_1.default(from, to);
+            const { groupDataView, groupDataLove, groupDataBookmark, groupDataRating, } = yield interaction.getInteractions();
             const data = [
                 ...groupDataPost,
                 ...groupDataView,
@@ -57,20 +59,37 @@ class ReportWorker {
             // });
             // create and update data
             getData.forEach((item) => __awaiter(this, void 0, void 0, function* () {
-                const dataFind = yield Report_1.default.findOne({ date: item.date });
+                const dataFind = yield Report_1.default.findOne({ date: item.date }, '_id');
                 if (dataFind === null) {
                     yield Report_1.default.create(item);
                 }
                 else {
-                    yield Report_1.default.updateOne({ date: item.date }, item);
+                    yield dataFind.updateOne(item);
                 }
             }));
-            // get all data
-            const response = yield Report_1.default.find({});
-            req.response = {
-                data: response,
-                total: response.length,
-            };
+            // find One
+            // await AmberReport.findOne({ count: 1 }).select('date count totalView').exec(
+            //   (err, result) => {
+            //     console.log(`@: ${result}`);
+            //     req.response = {
+            //       learn: result,
+            //     }
+            //   }
+            // );
+            // find All
+            yield Report_1.default.find({})
+                .select('date count totalView').limit(50)
+                .sort({ totalView: -1 })
+                .exec((err, result) => {
+                req.response = {
+                    data: result,
+                    total: result.length,
+                };
+            });
+            // req.response = {
+            //   data: response,
+            //   total: response.length,
+            // };
             next();
         });
     }

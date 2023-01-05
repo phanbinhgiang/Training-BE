@@ -1,4 +1,4 @@
-import { resInteractions } from '../../controller/controller';
+import QueryData from '../../common/queryDB';
 
 export default class InteractionWorker {
   static async getView(req, res, next) {
@@ -85,12 +85,13 @@ export default class InteractionWorker {
     //   },
     // ]);
 
+    const interaction = new QueryData(from, to);
     const {
       groupDataView,
       groupDataLove,
       groupDataBookmark,
       groupDataRating,
-    } = await resInteractions(from, to);
+    } = await interaction.getInteractions();
     req.response = {
       view: groupDataView,
       love: groupDataLove,

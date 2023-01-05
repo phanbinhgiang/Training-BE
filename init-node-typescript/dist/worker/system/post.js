@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Post_1 = __importDefault(require("../../model/system/Post"));
-const controller_1 = require("../../controller/controller");
+const queryDB_1 = __importDefault(require("../../common/queryDB"));
 class PostWorker {
     static getPostCount(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -26,7 +26,9 @@ class PostWorker {
                     $lte: parseFloat(to),
                 },
             });
-            const groupData = yield (0, controller_1.resPost)(from, to);
+            // const groupData = await resPost(from, to);
+            const post = new queryDB_1.default(from, to);
+            const groupData = yield post.getResPost();
             next();
             req.response = {
                 groupData,

@@ -8,8 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const controller_1 = require("../../controller/controller");
+const queryDB_1 = __importDefault(require("../../common/queryDB"));
 class InteractionWorker {
     static getView(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -89,7 +92,8 @@ class InteractionWorker {
             //     },
             //   },
             // ]);
-            const { groupDataView, groupDataLove, groupDataBookmark, groupDataRating, } = yield (0, controller_1.resInteractions)(from, to);
+            const interaction = new queryDB_1.default(from, to);
+            const { groupDataView, groupDataLove, groupDataBookmark, groupDataRating, } = yield interaction.getInteractions();
             req.response = {
                 view: groupDataView,
                 love: groupDataLove,
